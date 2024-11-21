@@ -1,0 +1,88 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load CSV file
+data = pd.read_csv("SStore.csv")
+
+# Calculate total sales and profit per category
+category_summary = data.groupby("Category").agg(
+    total_sales=pd.NamedAgg(column="Sales", aggfunc="sum"),
+    total_profit=pd.NamedAgg(column="Profit", aggfunc="sum"),
+).sort_values(by="total_sales", ascending=False)
+
+# Identify top selling and most profitable category
+top_selling_category = category_summary.index[0]
+most_profitable_category = category_summary.sort_values(by="total_profit", ascending=False).index[0]
+
+# Calculate profit margin per sub-category
+sub_category_summary = data.groupby("Sub-Category").agg(
+    total_sales=pd.NamedAgg(column="Sales", aggfunc="sum"),
+    total_profit=pd.NamedAgg(column="Profit", aggfunc="sum"),
+)
+sub_category_summary["profit_margin"] = (sub_category_summary["total_profit"] / sub_category_summary["total_sales"]) * 100
+
+# Identify top selling and most profitable sub-category
+top_selling_sub_category = sub_category_summary.sort_values(by="total_sales", ascending=False).index[0]
+most_profitable_sub_category = sub_category_summary.sort_values(by="profit_margin", ascending=False).index[0]
+
+# Analyze customer segment profitability
+segment_profitability = data.groupby("Segment").agg(
+    total_sales=pd.NamedAgg(column="Sales", aggfunc="sum"),
+    total_profit=pd.NamedAgg(column="Profit", aggfunc="sum"),
+)
+segment_profitability["profit_margin"] = (segment_profitability["total_profit"] / segment_profitability["total_sales"]) * 100
+
+# Identify most profitable segment
+most_profitable_segment = segment_profitability.sort_values(by="profit_margin", ascending=False).index[0]
+
+# Analyze preferred ship mode
+ship_mode_summary = data.groupby("Ship Mode").agg(
+    total_orders=pd.NamedAgg(column="Sales", aggfunc="count")
+)
+
+# Identify preferred ship mode
+preferred_ship_mode = ship_mode_summary.sort_values(by="total_orders", ascending=False).index[0]
+
+# Analyze regional profitability
+region_profitability = data.groupby("Region").agg(
+    total_sales=pd.NamedAgg(column="Sales", aggfunc="sum"),
+    total_profit=pd.NamedAgg(column="Profit", aggfunc="sum"),
+)
+region_profitability["profit_margin"] = (region_profitability["total_profit"] / region_profitability["total_sales"]) * 100
+
+# Identify most profitable region
+most_profitable_region = region_profitability.sort_values(by="profit_margin", ascending=False).index[0]
+
+# Analyze sales by city
+city_sales = data.groupby("City").agg(
+    total_sales=pd.NamedAgg(column="Sales", aggfunc="sum")
+)
+
+# Identify city with highest sales
+city_with_highest_sales = city_sales.sort_values(by="total_sales", ascending=False).index[0]
+
+## Generate insightful tables and improve presentation:
+
+# Category Summary Table
+category_table = category_summary.reset_index().to_string(index=False)
+print(f"## Category Summary\n {category_table}")
+
+# Sub-Category Summary Table
+sub_category_table = sub_category_summary.sort_values(by="profit_margin", ascending=False).head(10).reset_index().to_string(index=False)
+print(f"\n## Top 10 Sub-Categories by Profit Margin\n {sub_category_table}")
+
+# Segment Profitability Table
+segment_table = segment_profitability.sort_values(by="profit_margin", ascending=False).reset_index().to_string(index=False)
+print(f"\n## Segment Profitability\n {segment_table}")
+
+# Ship Mode Summary Table
+ship_mode_table = ship_mode_summary.reset_index().to_string(index=False)
+print(f"\n## Ship Mode Summary\n {ship_mode_table}")
+
+# Region Profitability Table
+region_table = region_profitability.sort_values(by="profit_margin", ascending=False).reset_index().to_string(index=False)
+print(f"\n## Region Profitability\n {region_table}")
+
+# City Sales Table
+city_table = city_sales.sort_values(by="total_sales", ascending=False).reset_index().to_string(index=False)
+print(f"\n## Top 10 Cities by Sales\n {city_table}")
